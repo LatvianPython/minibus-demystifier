@@ -5,6 +5,7 @@ from io import StringIO
 from contextlib import suppress
 import csv
 import logging
+from utility import handle_response
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -34,17 +35,7 @@ def online_stops():
     with requests.get(stops_url) as response:
         content = response.content.decode('utf-8-sig')
 
-        if response.status_code == 200:
-            logger.debug('response status: {}, length: {}'.format(response.status_code, len(response.content)))
-        else:
-            logger.critical(
-                'request failed with {}, content = "{}", headers = "{}", cookies = "{}"'.format(
-                    response.status_code,
-                    response.content,
-                    response.headers,
-                    response.cookies)
-            )
-            response.raise_for_status()
+        handle_response(response)
 
         with StringIO(content) as csv_data:
             delimiter = ';'

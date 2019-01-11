@@ -1,11 +1,16 @@
 import requests
 import itertools
+import logging
 from io import StringIO
 from minibus_stops import MinibusStop
 from minibus_stops import MinibusStops
 from dataclasses import dataclass
 from typing import NamedTuple
 from typing import List
+from utility import handle_response
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 class RouteID(NamedTuple):
@@ -32,6 +37,8 @@ class MinibusRoutes(dict):
         super().__init__()
         with requests.get(self.routes_url) as response:
             content = response.content.decode('utf-8-sig')
+
+            handle_response(response)
 
             with StringIO(content) as sting_buffer:
                 header_row = sting_buffer.readline().lower().split(';')

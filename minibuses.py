@@ -3,6 +3,7 @@ import logging
 from dataclasses import dataclass
 from geolocation import Geolocation
 import requests
+from utility import handle_response
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -39,17 +40,7 @@ class Minibuses:
 
         with self.session.get(minibus_url) as response:
 
-            if response.status_code == 200:
-                logger.debug('response status: {}, length: {}'.format(response.status_code, len(response.content)))
-            else:
-                logger.critical(
-                    'request failed with {}, content = "{}", headers = "{}", cookies = "{}"'.format(
-                        response.status_code,
-                        response.content,
-                        response.headers,
-                        response.cookies)
-                )
-                response.raise_for_status()
+            handle_response(response)
 
             minibuses = response.iter_lines(decode_unicode=True, delimiter='\n')
 
