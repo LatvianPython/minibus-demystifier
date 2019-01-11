@@ -1,16 +1,12 @@
 import time
 import logging
 from dataclasses import dataclass
-from typing import NamedTuple
+from geolocation import Geolocation
 import requests
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
-
-class Geolocation(NamedTuple):
-    longitude: float
-    latitude: float
 
 
 @dataclass
