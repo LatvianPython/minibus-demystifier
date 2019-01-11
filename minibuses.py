@@ -8,7 +8,6 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
-
 @dataclass
 class Minibus:
     route_number: int
@@ -38,23 +37,25 @@ class Minibuses:
 
         logger.debug('timestamp: {}'.format(current_unix_timestamp))
 
-        response = self.session.get(minibus_url)
+        with self.session.get(minibus_url) as response:
 
-        if response.status_code == 200:
-            logger.debug('response status: {}'.format(response.status_code))
-        else:
-            logger.critical(
-                'request failed with {}, content = "{}", headers = "{}", cookies = "{}"'.format(response.status_code,
-                                                                                                response.content,
-                                                                                                response.headers,
-                                                                                                response.cookies))
-            response.raise_for_status()
+            if response.status_code == 200:
+                logger.debug('response status: {}, length: {}'.format(response.status_code, len(response.content)))
+            else:
+                logger.critical(
+                    'request failed with {}, content = "{}", headers = "{}", cookies = "{}"'.format(
+                        response.status_code,
+                        response.content,
+                        response.headers,
+                        response.cookies)
+                )
+                response.raise_for_status()
 
-        minibuses = response.iter_lines(decode_unicode=True, delimiter='\n')
+            minibuses = response.iter_lines(decode_unicode=True, delimiter='\n')
 
-        return (Minibus(minibus)
-                for minibus in minibuses
-                if len(minibus) > 0)
+            return (Minibus(minibus)
+                    for minibus in minibuses
+                    if len(minibus) > 0)
 
 
 def main():
