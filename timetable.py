@@ -80,7 +80,6 @@ class Timetable:
         """
         return '{}:{}'.format(str(int(minutes / 60) % 24).rjust(2), str(minutes % 60).zfill(2))
 
-
     def __init__(self, timetable: str):
         self.departures, timetable = explode_times(timetable)
         self.timetable = timetable['timetable']
