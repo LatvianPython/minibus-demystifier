@@ -79,8 +79,8 @@ class Timetable:
         self.departures, timetable = explode_times(timetable)
         self.timetable = timetable['timetable']
 
-    def __getitem__(self, pos):
-        departure, stop = pos
+    def __getitem__(self, pos: TimetableIndex):
+        departure, stop = pos.departure, pos.stop
         timetable_index = departure - 1 + stop * self.departures
         return self.timetable[timetable_index]
 
