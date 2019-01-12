@@ -59,8 +59,9 @@ class MinibusRoutes(dict):
                     route_number = route_data['route_number']
                     route_type = route_data['route_type']
                     route_name = route_data['route_name']
-                    route_stops = [route_stop for route_stop in route_data['route_stops'].split(',') if
-                                   len(route_stop) > 0]
+                    route_stops = [route_stop
+                                   for route_stop in route_data['route_stops'].split(',')
+                                   if len(route_stop) > 0]
 
                     if len(route_number) == 0:
                         route_number = last_route_number
