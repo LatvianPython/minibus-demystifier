@@ -14,7 +14,7 @@ logger.addHandler(logging.NullHandler())
 
 
 class RouteID(NamedTuple):
-    number: str
+    route_number: str
     type: str
 
 
@@ -22,7 +22,7 @@ class RouteID(NamedTuple):
 class MinibusRoute:
     name: str
     stops: List[MinibusStop]
-    timetable: str
+    time_table: str
 
 
 class MinibusRoutes(dict):
@@ -50,8 +50,8 @@ class MinibusRoutes(dict):
                 stops = MinibusStops()
 
                 last_route_number = None
-                for column_values, timetable in itertools.zip_longest(*[sting_buffer] * 2):
-                    timetable = timetable.strip()
+                for column_values, time_table in itertools.zip_longest(*[sting_buffer] * 2):
+                    time_table = time_table.strip()
                     column_values = column_values.split(';')
 
                     route_data = dict(zip(fieldnames, column_values))
@@ -68,8 +68,8 @@ class MinibusRoutes(dict):
 
                     route_stops = [stops[route_stop] for route_stop in route_stops]
 
-                    route_id = RouteID(number=route_number, type=route_type)
-                    route = MinibusRoute(name=route_name, stops=route_stops, timetable=timetable)
+                    route_id = RouteID(route_number=route_number, type=route_type)
+                    route = MinibusRoute(name=route_name, stops=route_stops, time_table=time_table)
                     last_route_number = route_number
                     self[route_id] = route
 
@@ -77,9 +77,9 @@ class MinibusRoutes(dict):
 def main():
     minibus_routes = MinibusRoutes()
 
-    route = minibus_routes[RouteID(number='214', type='b-a')]
+    route = minibus_routes[RouteID(route_number='214', type='b-a')]
 
-    print(route)
+    print(route.stops)
 
 
 if __name__ == '__main__':
