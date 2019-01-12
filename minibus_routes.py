@@ -22,7 +22,7 @@ class RouteID(NamedTuple):
 class MinibusRoute:
     name: str
     stops: List[MinibusStop]
-    time_table: str
+    timetable: str
 
 
 class MinibusRoutes(dict):
@@ -50,8 +50,8 @@ class MinibusRoutes(dict):
                 stops = MinibusStops()
 
                 last_route_number = None
-                for column_values, time_table in itertools.zip_longest(*[sting_buffer] * 2):
-                    time_table = time_table.strip()
+                for column_values, timetable in itertools.zip_longest(*[sting_buffer] * 2):
+                    timetable = timetable.strip()
                     column_values = column_values.split(';')
 
                     route_data = dict(zip(fieldnames, column_values))
@@ -69,7 +69,7 @@ class MinibusRoutes(dict):
                     route_stops = [stops[route_stop] for route_stop in route_stops]
 
                     route_id = RouteID(route_number=route_number, type=route_type)
-                    route = MinibusRoute(name=route_name, stops=route_stops, time_table=time_table)
+                    route = MinibusRoute(name=route_name, stops=route_stops, timetable=timetable)
                     last_route_number = route_number
                     self[route_id] = route
 
