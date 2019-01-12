@@ -2,7 +2,9 @@ import math
 from typing import NamedTuple
 
 
-def measure(lon1, lat1, lon2, lat2):
+def distance_between_points(p1, p2):
+    lon1, lat1 = p1
+    lon2, lat2 = p2
     r = 6378.137
     d_lat = lat2 * math.pi / 180 - lat1 * math.pi / 180
     d_lon = lon2 * math.pi / 180 - lon1 * math.pi / 180
@@ -11,10 +13,6 @@ def measure(lon1, lat1, lon2, lat2):
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
     d = r * c
     return d * 1000
-
-
-def distance_between_points(p1, p2):
-    return measure(p1[0], p1[1], p2[0], p2[1])
 
 
 class Geolocation(NamedTuple):
