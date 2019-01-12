@@ -37,22 +37,21 @@ def explode_times(encoded_data):
 
     valid_from, valid_to, weekdays = (decode_data(data_slice, number_of_departures) for data_slice in data[1:4])
 
-    time_between_stops = data[4]
+    time_between_stops = [int(val.zfill(1)) for val in data[4]]
 
     delta_time = 5
     left_to_parse = number_of_departures
-    for i in range(0, len(time_between_stops) - 2, 2):
-        times = (time_between_stops[i], time_between_stops[i + 1])
-        delta_time = delta_time + int(time_between_stops[i]) - 5
-        stop_with_current_delta = int(times[1].zfill(1))
+    for time_delta, stop_with_current_delta in itertools.zip_longest(*[iter(time_between_stops[:-2])] * 2, fillvalue=0):
+
+        delta_time = delta_time + time_delta - 5
 
         if stop_with_current_delta > 0:
             left_to_parse = left_to_parse - stop_with_current_delta
         else:
-            stop_with_current_delta = left_to_parse
-            left_to_parse = 0
+            stop_with_current_delta, left_to_parse = left_to_parse, 0
 
         index_to = -(number_of_departures - stop_with_current_delta)
+
         if index_to == 0:
             index_to = None
 
@@ -60,8 +59,7 @@ def explode_times(encoded_data):
                       for departure_time in timetable[-number_of_departures:index_to]]
 
         if left_to_parse <= 0:
-            left_to_parse = number_of_departures
-            delta_time = 5
+            left_to_parse, delta_time = number_of_departures, 5
 
     return {'weekdays': weekdays,
             'timetable': timetable,
