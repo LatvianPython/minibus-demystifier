@@ -2,6 +2,12 @@ from minibus_routes import MinibusRoutes
 from minibus_routes import RouteID
 import hashlib
 import itertools
+from typing import NamedTuple
+
+
+class TimetableIndex(NamedTuple):
+    departure: int
+    stop: int
 
 
 def running_sum(integers):
@@ -33,7 +39,7 @@ def explode_times(encoded_data):
 
     timetable = list(running_sum(data[0]))
 
-    number_of_departures = len(data[0])
+    number_of_departures = len(timetable)
 
     valid_from, valid_to, weekdays = (decode_data(data_slice, number_of_departures) for data_slice in data[1:4])
 
@@ -61,10 +67,22 @@ def explode_times(encoded_data):
         if left_to_parse <= 0:
             left_to_parse, delta_time = number_of_departures, 5
 
-    return {'weekdays': weekdays,
-            'timetable': timetable,
-            'valid_from': valid_from,
-            'valid_to': valid_to}
+    return number_of_departures, {'weekdays': weekdays,
+                                  'timetable': timetable,
+                                  'valid_from': valid_from,
+                                  'valid_to': valid_to}
+
+
+class Timetable:
+
+    def __init__(self, timetable: str):
+        self.departures, timetable = explode_times(timetable)
+        self.timetable = timetable['timetable']
+
+    def __getitem__(self, pos):
+        departure, stop = pos
+        timetable_index = departure - 1 + stop * self.departures
+        return self.timetable[timetable_index]
 
 
 def main():
@@ -74,11 +92,15 @@ def main():
 
     route = routes[desired_route]
 
-    exploded_times = explode_times(route.timetable)
+    timetable = Timetable(route.timetable)
 
-    hash_object = hashlib.md5(str(exploded_times).encode('utf-8'))
+    time_at_stop = timetable[TimetableIndex(departure=13, stop=0)]
+
+    assert time_at_stop == 375
+
+    hash_object = hashlib.md5(str(timetable.timetable).encode('utf-8'))
     digest = hash_object.hexdigest()
-    test_digest = '11f0804c5eb09f80e0e77a3d62277cb9'
+    test_digest = 'f88d7270866077f81c85a29131100292'
 
     assert digest == test_digest, 'hashes do not match anymore: {} != {}'.format(digest, test_digest)
 
