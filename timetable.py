@@ -74,6 +74,12 @@ def explode_times(encoded_data):
 
 
 class Timetable:
+    @staticmethod
+    def format_time(minutes):
+        """ returns string representation of a timetable record
+        """
+        return '{}:{}'.format(str(int(minutes / 60) % 24).rjust(2), str(minutes % 60).zfill(2))
+
 
     def __init__(self, timetable: str):
         self.departures, timetable = explode_times(timetable)
