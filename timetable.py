@@ -29,18 +29,13 @@ def split_data(data, depth=4):
 
 
 def explode_times(encoded_data):
-    # decoding times
-    data = encoded_data.split(',')
-
-    data = split_data(data)
-
-    number_of_departures = len(data[0])
+    data = split_data(encoded_data.split(','))
 
     timetable = list(running_sum(data[0]))
 
-    valid_from = decode_data(data[1], number_of_departures)
-    valid_to = decode_data(data[2], number_of_departures)
-    weekdays = decode_data(data[3], number_of_departures)
+    number_of_departures = len(data[0])
+
+    valid_from, valid_to, weekdays = (decode_data(data_slice, number_of_departures) for data_slice in data[1:4])
 
     time_between_stops = data[4]
 
