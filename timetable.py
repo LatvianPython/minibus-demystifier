@@ -1,6 +1,7 @@
 from minibus_routes import MinibusRoutes
 from minibus_routes import RouteID
 import hashlib
+import itertools
 
 
 def running_sum(integers):
@@ -10,26 +11,20 @@ def running_sum(integers):
         yield total
 
 
-def parse_days(encoded_data, days):
-    # print(encoded_data)
+def decode_data(encoded_data, days):
+    remaining_days = days - sum(int(days_active) for days_active in encoded_data[1::2])
 
-    chunks = [encoded_data[x:x + 2] for x in range(0, len(encoded_data), 2)]
-    # print(chunks)
-    valid_from = []
-    for day in chunks:
-        try:
-            valid_from += [day[0]] * int(day[1])
-        except IndexError:
-            valid_from += [day[0]] * (days - len(valid_from))
-
-    # print('{} -> {}'.format(encoded_data, valid_from))
-    return valid_from
+    decoded_data = itertools.chain.from_iterable(
+        [data] * int(for_days)
+        for data, for_days in itertools.zip_longest(*[iter(encoded_data)] * 2, fillvalue=remaining_days)
+    )
+    return list(decoded_data)
 
 
 def split_data(data, depth=4):
     if depth != 0:
-        index = data.index('')
-        return [data[:index]] + split_data(data[index + 1:], depth - 1)
+        end_of_segment = data.index('')
+        return [data[:end_of_segment]] + split_data(data[end_of_segment + 1:], depth - 1)
     return [data]
 
 
@@ -43,9 +38,9 @@ def explode_times(encoded_data):
 
     timetable = list(running_sum(data[0]))
 
-    valid_from = parse_days(data[1], number_of_departures)
-    valid_to = parse_days(data[2], number_of_departures)
-    weekdays = parse_days(data[3], number_of_departures)
+    valid_from = decode_data(data[1], number_of_departures)
+    valid_to = decode_data(data[2], number_of_departures)
+    weekdays = decode_data(data[3], number_of_departures)
 
     time_between_stops = data[4]
 
@@ -93,6 +88,21 @@ def main():
     test_digest = '11f0804c5eb09f80e0e77a3d62277cb9'
 
     assert digest == test_digest, 'hashes do not match anymore: {} != {}'.format(digest, test_digest)
+
+    encoded_data_test = ['17728', '12', '17726']
+    days_test = 79
+
+    decoded_data = decode_data(encoded_data_test, days_test)
+    assert len(decoded_data) == days_test
+    assert decoded_data == ['17728', '17728', '17728', '17728', '17728', '17728', '17728', '17728', '17728', '17728',
+                            '17728', '17728', '17726', '17726', '17726', '17726', '17726', '17726', '17726', '17726',
+                            '17726', '17726', '17726', '17726', '17726', '17726', '17726', '17726', '17726', '17726',
+                            '17726', '17726', '17726', '17726', '17726', '17726', '17726', '17726', '17726', '17726',
+                            '17726', '17726', '17726', '17726', '17726', '17726', '17726', '17726', '17726', '17726',
+                            '17726', '17726', '17726', '17726', '17726', '17726', '17726', '17726', '17726', '17726',
+                            '17726', '17726', '17726', '17726', '17726', '17726', '17726', '17726', '17726', '17726',
+                            '17726', '17726', '17726', '17726', '17726', '17726', '17726', '17726', '17726']
+
     print('all ok')
 
 
