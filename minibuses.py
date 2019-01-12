@@ -19,6 +19,16 @@ class Minibus:
     heading: int
     car_id: str
 
+    # todo: not sure I will need these in the end
+    def __key(self):
+        return self.route_number, self.car_id
+
+    def __hash__(self):
+        return hash(self.__key())
+
+    def __eq__(self, other):
+        return isinstance(self, type(other)) and self.__key() == other.__key()
+
     def __init__(self, raw_minibus: str):
         self.route_number, longitude, latitude, self.speed, self.heading, self.car_id = raw_minibus.split(',')[1:-1]
 
@@ -37,12 +47,13 @@ class Minibuses:
         if debug:
             self.minibus_archive = glob.glob('gps/*.txt')
             self.minibus_archive = sorted(self.minibus_archive, key=lambda path: pathlib.Path(path).name)
-            self.get_minibuses = self.get_minibuses_archive()
+            self.get_minibuses = self.get_minibuses_archive
         else:
-            self.get_minibuses = self.get_minibuses_online()
+            self.get_minibuses = self.get_minibuses_online
 
     def get_minibuses_archive(self):
-        file = self.minibus_archive.pop()
+        file = self.minibus_archive.pop(0)
+        logger.debug('file: {}'.format(file))
         with open(file, mode='r', encoding='utf-8') as archive_gps:
             for line in archive_gps:
                 yield line
@@ -61,7 +72,7 @@ class Minibuses:
             return minibuses
 
     def __iter__(self):
-        minibuses = self.get_minibuses
+        minibuses = self.get_minibuses()
         return (Minibus(minibus)
                 for minibus in minibuses
                 if len(minibus) > 0)
