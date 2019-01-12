@@ -2,6 +2,12 @@ from minibus_routes import MinibusRoutes
 from minibus_routes import RouteID
 import hashlib
 import itertools
+from typing import NamedTuple
+
+
+class TimetableIndex(NamedTuple):
+    departure: int
+    stop: int
 
 
 def running_sum(integers):
@@ -29,35 +35,29 @@ def split_data(data, depth=4):
 
 
 def explode_times(encoded_data):
-    # decoding times
-    data = encoded_data.split(',')
-
-    data = split_data(data)
-
-    number_of_departures = len(data[0])
+    data = split_data(encoded_data.split(','))
 
     timetable = list(running_sum(data[0]))
 
-    valid_from = decode_data(data[1], number_of_departures)
-    valid_to = decode_data(data[2], number_of_departures)
-    weekdays = decode_data(data[3], number_of_departures)
+    number_of_departures = len(timetable)
 
-    time_between_stops = data[4]
+    valid_from, valid_to, weekdays = (decode_data(data_slice, number_of_departures) for data_slice in data[1:4])
+
+    time_between_stops = [int(val.zfill(1)) for val in data[4]]
 
     delta_time = 5
     left_to_parse = number_of_departures
-    for i in range(0, len(time_between_stops) - 2, 2):
-        times = (time_between_stops[i], time_between_stops[i + 1])
-        delta_time = delta_time + int(time_between_stops[i]) - 5
-        stop_with_current_delta = int(times[1].zfill(1))
+    for time_delta, stop_with_current_delta in itertools.zip_longest(*[iter(time_between_stops[:-2])] * 2, fillvalue=0):
+
+        delta_time = delta_time + time_delta - 5
 
         if stop_with_current_delta > 0:
             left_to_parse = left_to_parse - stop_with_current_delta
         else:
-            stop_with_current_delta = left_to_parse
-            left_to_parse = 0
+            stop_with_current_delta, left_to_parse = left_to_parse, 0
 
         index_to = -(number_of_departures - stop_with_current_delta)
+
         if index_to == 0:
             index_to = None
 
@@ -65,13 +65,24 @@ def explode_times(encoded_data):
                       for departure_time in timetable[-number_of_departures:index_to]]
 
         if left_to_parse <= 0:
-            left_to_parse = number_of_departures
-            delta_time = 5
+            left_to_parse, delta_time = number_of_departures, 5
 
-    return {'weekdays': weekdays,
-            'timetable': timetable,
-            'valid_from': valid_from,
-            'valid_to': valid_to}
+    return number_of_departures, {'weekdays': weekdays,
+                                  'timetable': timetable,
+                                  'valid_from': valid_from,
+                                  'valid_to': valid_to}
+
+
+class Timetable:
+
+    def __init__(self, timetable: str):
+        self.departures, timetable = explode_times(timetable)
+        self.timetable = timetable['timetable']
+
+    def __getitem__(self, pos: TimetableIndex):
+        departure, stop = pos.departure, pos.stop
+        timetable_index = departure - 1 + stop * self.departures
+        return self.timetable[timetable_index]
 
 
 def main():
@@ -81,11 +92,15 @@ def main():
 
     route = routes[desired_route]
 
-    exploded_times = explode_times(route.timetable)
+    timetable = Timetable(route.timetable)
 
-    hash_object = hashlib.md5(str(exploded_times).encode('utf-8'))
+    time_at_stop = timetable[TimetableIndex(departure=13, stop=0)]
+
+    assert time_at_stop == 375
+
+    hash_object = hashlib.md5(str(timetable.timetable).encode('utf-8'))
     digest = hash_object.hexdigest()
-    test_digest = '11f0804c5eb09f80e0e77a3d62277cb9'
+    test_digest = 'f88d7270866077f81c85a29131100292'
 
     assert digest == test_digest, 'hashes do not match anymore: {} != {}'.format(digest, test_digest)
 
