@@ -30,7 +30,7 @@ class MinibusTracker(object):
             for car_id, minibus in self.non_tracked_buses.items():
                 if (car_id in self.tracked_minibuses or (
                         minibus.route_number == route_id.route_number and
-                        self.is_bus_at_first_stop_in_route(minibus, route_data.stops))):
+                        closest_stop(minibus=minibus, stops=route_data.stops)[0] == 0)):
                     minibus.closest_stop = closest_stop(minibus=minibus, stops=route_data.stops)
                     minibus.departure = route_data.timetable.closest_departure(
                         current_time=current_time,
@@ -42,22 +42,21 @@ class MinibusTracker(object):
         for route_id, route_data in self.routes.items():
             for car_id, minibus in self.tracked_minibuses.copy().items():
                 if (minibus.route_number == route_id.route_number and
-                        self.is_bus_at_last_stop_in_route(minibus, route_data.stops)):
+                        closest_stop(minibus=minibus, stops=route_data.stops)[0] == (len(route_data.stops) - 1)):
                     del self.tracked_minibuses[car_id]
 
-        for car_id, minibus in self.tracked_minibuses.items():
-            if car_id in self.non_tracked_buses.keys():
+        for car_id in self.tracked_minibuses.keys():
+            if car_id not in self.non_tracked_buses.keys():
                 self.tracked_minibuses[car_id].times_not_found += 1
 
         self.tracked_minibuses = {car_id: minibus
                                   for car_id, minibus in self.tracked_minibuses.items()
-                                  if car_id in self.non_tracked_buses.keys() and
-                                  minibus.times_not_found < 10
+                                  if minibus.times_not_found < 5
                                   }
 
         for car_id, minibus in self.tracked_minibuses.items():
             print(current_time, car_id, minibus.location, minibus.closest_stop[0], minibus.closest_stop[1].name,
-                  minibus.departure, sep='\t')
+                  minibus.departure, minibus.times_not_found, sep='\t')
 
     def run(self):
         while True:
