@@ -34,7 +34,7 @@ def test_timetable():
 
     timetable = route.timetable
 
-    time_at_stop = timetable[TimetableIndex(departure=13, stop=0)]
+    time_at_stop = timetable[TimetableIndex(departure=12, stop=0)]
 
     hash_object = hashlib.md5(str(timetable.timetable).encode('utf-8'))
     digest = hash_object.hexdigest()
@@ -65,4 +65,18 @@ def test_closest_departure():
 
     closest_departure = timetable.closest_departure(current_time, stop_index)
 
-    assert_equal(32, closest_departure)
+    assert_equal(31, closest_departure)
+
+
+def test_time_difference():
+    minibus_routes = MinibusRoutes()
+
+    route = minibus_routes[RouteID(route_number='246', type='a1-b')]
+
+    timetable = route.timetable
+
+    difference = timetable.time_to_stop(28, 6, 11)
+    assert_equal(difference, 9)
+
+    difference = timetable.time_to_stop(0, 0, 6)
+    assert_equal(difference, 10)

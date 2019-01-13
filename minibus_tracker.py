@@ -31,10 +31,10 @@ class MinibusTracker(object):
                 if (car_id in self.tracked_minibuses or (
                         minibus.route_number == route_id.route_number and
                         closest_stop(minibus=minibus, stops=route_data.stops)[0] == 0)):
-                    minibus.closest_stop = closest_stop(minibus=minibus, stops=route_data.stops)
+                    minibus.stop_index, minibus.stop = closest_stop(minibus=minibus, stops=route_data.stops)
                     minibus.departure = route_data.timetable.closest_departure(
                         current_time=current_time,
-                        closest_stop_index=minibus.closest_stop[0]
+                        closest_stop_index=minibus.stop_index
                     )
                     minibus.times_not_found = 0
                     self.tracked_minibuses[car_id] = minibus
@@ -54,9 +54,9 @@ class MinibusTracker(object):
                                   if minibus.times_not_found < 5
                                   }
 
-        for car_id, minibus in self.tracked_minibuses.items():
-            print(current_time, car_id, minibus.location, minibus.closest_stop[0], minibus.closest_stop[1].name,
-                  minibus.departure, minibus.times_not_found, sep='\t')
+        # for car_id, minibus in self.tracked_minibuses.items():
+        #     print(current_time, car_id, minibus.location, minibus.stop_index, minibus.stop.name,
+        #           minibus.departure, minibus.times_not_found, sep='\t')
 
     def run(self):
         while True:
