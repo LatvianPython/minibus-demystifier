@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime, timezone, timedelta
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -16,3 +17,9 @@ def handle_response(response):
                 response.cookies)
         )
         response.raise_for_status()
+
+def to_datetime(timestamp):
+    try:
+        return datetime.fromtimestamp(timestamp, timezone(timedelta(hours=2)))
+    except TypeError:
+        return to_datetime(int(timestamp))

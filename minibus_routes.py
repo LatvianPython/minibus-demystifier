@@ -7,6 +7,7 @@ from minibus_stops import MinibusStops
 from dataclasses import dataclass
 from typing import NamedTuple
 from typing import List
+from timetable import Timetable
 from utility import handle_response
 
 logger = logging.getLogger(__name__)
@@ -22,7 +23,7 @@ class RouteID(NamedTuple):
 class MinibusRoute:
     name: str
     stops: List[MinibusStop]
-    timetable: str
+    timetable: Timetable
 
 
 class MinibusRoutes(dict):
@@ -69,7 +70,7 @@ class MinibusRoutes(dict):
                     route_stops = [stops[route_stop] for route_stop in route_stops]
 
                     route_id = RouteID(route_number=route_number, type=route_type)
-                    route = MinibusRoute(name=route_name, stops=route_stops, timetable=timetable)
+                    route = MinibusRoute(name=route_name, stops=route_stops, timetable=Timetable(timetable))
                     last_route_number = route_number
                     self[route_id] = route
 
@@ -77,9 +78,12 @@ class MinibusRoutes(dict):
 def main():
     minibus_routes = MinibusRoutes()
 
-    route = minibus_routes[RouteID(route_number='214', type='b-a')]
+    route = minibus_routes[RouteID(route_number='246', type='b-a1')]
 
-    print(route.stops)
+    stops = route.stops
+
+    for stop in stops[:5]:
+        print(stop)
 
 
 if __name__ == '__main__':

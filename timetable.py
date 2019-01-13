@@ -1,8 +1,9 @@
-from minibus_routes import MinibusRoutes
-from minibus_routes import RouteID
-import hashlib
 import itertools
+import logging
 from typing import NamedTuple
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 class TimetableIndex(NamedTuple):
@@ -87,4 +88,22 @@ class Timetable:
     def __getitem__(self, pos: TimetableIndex):
         departure, stop = pos.departure, pos.stop
         timetable_index = departure - 1 + stop * self.departures
-        return self.timetable[timetable_index]
+        time_value = self.timetable[timetable_index]
+        logging.debug('{} {}'.format(timetable_index, time_value))
+        return time_value
+
+    def closest_departure(self, current_time, closest_stop_index):
+        time_value = current_time.minute + current_time.hour * 60
+        logging.debug('time_value = {}'.format(time_value))
+        departure, _ = min(((i, abs(self[TimetableIndex(departure=i, stop=closest_stop_index)] - time_value))
+                            for i in range(self.departures)),
+                           key=lambda a: a[1])
+        return departure
+
+
+def main():
+    pass
+
+
+if __name__ == '__main__':
+    main()

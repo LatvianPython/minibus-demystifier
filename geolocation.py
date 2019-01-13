@@ -18,8 +18,8 @@ def distance_between_points(p1, p2):
 
 
 class Geolocation(NamedTuple):
-    longitude: float
     latitude: float
+    longitude: float
 
     def __sub__(self, other):
         return distance_between_points(self, other)

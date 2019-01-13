@@ -1,49 +1,88 @@
 from minibus_generator import MinibusGenerator
-from minibus_stops import MinibusStop
+from minibus_stops import MinibusStop, closest_stop
 from typing import List
+import logging
 from minibus_routes import MinibusRoutes
 from minibus_routes import RouteID
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 class MinibusTracker(object):
 
     def __init__(self, debug=False):
-        self.minbus_generator = MinibusGenerator(debug=debug)
+        self.minibus_generator = MinibusGenerator(debug=debug)
 
-        tracked_routes = [RouteID(route_number='246', type='b-a1')]
+        tracked_routes = [RouteID(route_number='246', type='a1-b')]
 
         self.routes = {route_id: route_data
                        for route_id, route_data in MinibusRoutes().items()
                        if route_id in tracked_routes}
 
         self.non_tracked_buses = None
-        self.tracked_buses = {}
+        self.tracked_minibuses = {}
 
+    def refresh_minibuses(self):
+        current_time, self.non_tracked_buses = self.minibus_generator.get_minibuses()
+        logger.debug('current_time = {}'.format(current_time))
+        for route_id, route_data in self.routes.items():
+            for car_id, minibus in self.non_tracked_buses.items():
+                if (car_id in self.tracked_minibuses or (
+                        minibus.route_number == route_id.route_number and
+                        closest_stop(minibus=minibus, stops=route_data.stops)[0] == 0)):
+                    minibus.closest_stop = closest_stop(minibus=minibus, stops=route_data.stops)
+                    minibus.departure = route_data.timetable.closest_departure(
+                        current_time=current_time,
+                        closest_stop_index=minibus.closest_stop[0]
+                    )
+                    minibus.times_not_found = 0
+                    self.tracked_minibuses[car_id] = minibus
+
+        for route_id, route_data in self.routes.items():
+            for car_id, minibus in self.tracked_minibuses.copy().items():
+                if (minibus.route_number == route_id.route_number and
+                        closest_stop(minibus=minibus, stops=route_data.stops)[0] == (len(route_data.stops) - 1)):
+                    del self.tracked_minibuses[car_id]
+
+        for car_id in self.tracked_minibuses.keys():
+            if car_id not in self.non_tracked_buses.keys():
+                self.tracked_minibuses[car_id].times_not_found += 1
+
+        self.tracked_minibuses = {car_id: minibus
+                                  for car_id, minibus in self.tracked_minibuses.items()
+                                  if minibus.times_not_found < 5
+                                  }
+
+        for car_id, minibus in self.tracked_minibuses.items():
+            print(current_time, car_id, minibus.location, minibus.closest_stop[0], minibus.closest_stop[1].name,
+                  minibus.departure, minibus.times_not_found, sep='\t')
 
     def run(self):
         while True:
-            self.non_tracked_buses = iter(self.minbus_generator)
-            for route_id, route_data in self.routes.items():
-                for minibus in self.non_tracked_buses:
-                    if minibus.route_number == route_id.route_number:
-                        if self.is_bus_at_terminal_station(minibus, route_data.stops):
-                            print(minibus.car_id, 'at terminal station')
+            self.refresh_minibuses()
+            logging.debug('tracked buses = {}'.format(len(self.tracked_minibuses)))
+
+    def is_bus_at_first_stop_in_route(self, minibus, stops: List[MinibusStop]):
+        return self.is_bus_at_terminus(minibus=minibus, stops=stops, start_station=True)
+
+    def is_bus_at_last_stop_in_route(self, minibus, stops: List[MinibusStop]):
+        return self.is_bus_at_terminus(minibus=minibus, stops=stops, start_station=False)
 
     @staticmethod
-    def is_bus_at_terminal_station(minibus, stops: List[MinibusStop]):
-        return minibus.location - stops[0].location < 40
-
-    @staticmethod
-    def closest_stop(minibus, stops: List[MinibusStop]):
-        return min([(stop, minibus.location - stop.location)
-                    for stop in stops],
-                   key=lambda a: a[1])
+    def is_bus_at_terminus(minibus, stops: List[MinibusStop], start_station):
+        return minibus.location - stops[0 if start_station else -1].location < 300
 
 
 def main():
     minibus_tracker = MinibusTracker(debug=True)
 
-    minibus_tracker.run()
+    # minibus_tracker.run()
+
+    for i in range(1875):
+        minibus_tracker.refresh_minibuses()
+
+        # print(i, len(minibus_tracker.tracked_minibuses))
 
 
 if __name__ == '__main__':

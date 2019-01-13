@@ -1,8 +1,9 @@
 import hashlib
+from minibus_generator import MinibusGenerator
 from minibus_routes import MinibusRoutes
 from minibus_routes import RouteID
+from minibus_stops import closest_stop
 from timetable import TimetableIndex
-from timetable import Timetable
 from timetable import decode_data
 from nose.tools import assert_equal
 
@@ -31,7 +32,7 @@ def test_timetable():
     desired_route = RouteID(route_number='246', type='a-b')
     route = routes[desired_route]
 
-    timetable = Timetable(route.timetable)
+    timetable = route.timetable
 
     time_at_stop = timetable[TimetableIndex(departure=13, stop=0)]
 
@@ -41,3 +42,27 @@ def test_timetable():
 
     assert_equal(time_at_stop, 375)
     assert_equal(digest, expected_digest)
+
+
+def test_closest_departure():
+    minibus_routes = MinibusRoutes()
+
+    route = minibus_routes[RouteID(route_number='246', type='a1-b')]
+
+    minibus_generator = MinibusGenerator(debug=True)
+
+    current_time, minibuses = minibus_generator.get_minibuses()
+
+    stops = route.stops
+
+    minibus = [minibus
+               for minibus in minibuses.values()
+               if minibus.route_number == '246'][0]
+
+    stop_index, _ = closest_stop(minibus, stops)
+
+    timetable = route.timetable
+
+    closest_departure = timetable.closest_departure(current_time, stop_index)
+
+    assert_equal(32, closest_departure)

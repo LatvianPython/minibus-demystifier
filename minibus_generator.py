@@ -4,7 +4,10 @@ from dataclasses import dataclass
 from geolocation import Geolocation
 import requests
 import glob
+from utility import to_datetime
 import pathlib
+from datetime import datetime
+from typing import Dict
 from utility import handle_response
 
 logger = logging.getLogger(__name__)
@@ -17,23 +20,6 @@ class Minibus:
     location: Geolocation
     speed: int
     heading: int
-    car_id: str
-
-    def __init__(self, raw_minibus: str):
-        self.route_number, longitude, latitude, self.speed, self.heading, self.car_id = raw_minibus.split(',')[1:-1]
-
-        self.route_number, self.speed, self.heading = self.route_number, int(self.speed), int(self.heading)
-
-        longitude, latitude = int(longitude) / 1000000, int(latitude) / 1000000
-        self.location = Geolocation(latitude=latitude, longitude=longitude)
-
-
-class Minibuses(dict):
-    def __init__(self, minibus_generator):
-        super().__init__()
-        for minibus in minibus_generator:
-            key = minibus.car_id
-            self[key] = minibus
 
 
 class MinibusGenerator:
@@ -45,21 +31,34 @@ class MinibusGenerator:
         if debug:
             self.minibus_archive = glob.glob('gps/*.txt')
             self.minibus_archive = sorted(self.minibus_archive, key=lambda path: pathlib.Path(path).name)
-            self.get_minibuses = self.get_minibuses(self.get_minibuses_archive)
+            self.get_minibuses = self.get_minibuses(self.__get_minibuses_archive)
         else:
-            self.get_minibuses = self.get_minibuses(self.get_minibuses_online)
+            self.get_minibuses = self.get_minibuses(self.__get_minibuses_online)
 
     @staticmethod
-    def get_minibuses(minibus_retriever):
+    def __parse_minibus(minibus: str):
+        route_number, longitude, latitude, speed, heading, car_id = minibus.split(',')[1:-1]
+
+        route_number, speed, heading = route_number, int(speed), int(heading)
+
+        longitude, latitude = int(longitude) / 1000000, int(latitude) / 1000000
+        location = Geolocation(latitude=latitude, longitude=longitude)
+
+        return car_id, Minibus(route_number=route_number, location=location, speed=speed, heading=heading)
+
+    def get_minibuses(self, minibus_retriever) -> (datetime, Dict[str, Minibus]):
         def get_minibuses():
             timestamp, minibuses = minibus_retriever()
-            return int(timestamp), Minibuses((Minibus(minibus)
-                                              for minibus in minibuses
-                                              if len(minibus) > 0))
+            logger.debug('timestamp: {}'.format(timestamp))
+            return (to_datetime(timestamp),
+                    {car_id: minibus
+                     for car_id, minibus in (self.__parse_minibus(minibus)
+                                             for minibus in minibuses
+                                             if len(minibus) > 0)})
 
         return get_minibuses
 
-    def get_minibuses_archive(self):
+    def __get_minibuses_archive(self):
         file_name = self.minibus_archive.pop(0)
 
         def minibus_generator(file):
@@ -72,7 +71,7 @@ class MinibusGenerator:
         minibuses = minibus_generator(file_name)
         return current_unix_timestamp, minibuses
 
-    def get_minibuses_online(self):
+    def __get_minibuses_online(self):
         current_unix_timestamp = time.time()
         minibus_url = self.minibus_url.format(str(round(current_unix_timestamp, 3)).replace('.', ''))
 
@@ -88,8 +87,12 @@ class MinibusGenerator:
 
 def main():
     minibus_generator = MinibusGenerator(debug=True)
-    _, minibuses = minibus_generator.get_minibuses()
-    for minibus in minibuses:
+    current_time, minibuses = minibus_generator.get_minibuses()
+
+    print(current_time.second + current_time.hour * 60)
+    for minibus in [item
+                    for i, item in enumerate(minibuses.items())
+                    if i < 5]:
         print(minibus)
 
 
