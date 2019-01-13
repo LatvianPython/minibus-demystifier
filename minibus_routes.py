@@ -77,9 +77,12 @@ class MinibusRoutes(dict):
 def main():
     minibus_routes = MinibusRoutes()
 
-    route = minibus_routes[RouteID(route_number='214', type='b-a')]
+    route = minibus_routes[RouteID(route_number='246', type='b-a1')]
 
-    print(route.stops)
+    stops = route.stops
+
+    for stop in stops[:5]:
+        print(stop)
 
 
 if __name__ == '__main__':

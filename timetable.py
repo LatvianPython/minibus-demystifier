@@ -1,6 +1,3 @@
-from minibus_routes import MinibusRoutes
-from minibus_routes import RouteID
-import hashlib
 import itertools
 from typing import NamedTuple
 
@@ -88,3 +85,21 @@ class Timetable:
         departure, stop = pos.departure, pos.stop
         timetable_index = departure - 1 + stop * self.departures
         return self.timetable[timetable_index]
+
+    def closest_departure(self, current_time, timetable, minibus):
+        # best_fit = (99999, 0)
+        # for i in range(1, max_departures + 1):
+        #     test_index = i - 1 + closest_stop[2] * max_departures
+        #     if abs(times_table[test_index] - current_time) < best_fit[0]:
+        #         best_fit = (abs(times_table[test_index] - current_time), i)
+        #
+        # clicked_departure = best_fit[1]
+        pass
+
+
+def main():
+    pass
+
+
+if __name__ == '__main__':
+    main()

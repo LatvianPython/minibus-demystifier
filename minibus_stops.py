@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from io import StringIO
 from contextlib import suppress
 import csv
+from typing import List
 import logging
 from utility import handle_response
 
@@ -60,6 +61,12 @@ class MinibusStops(dict):
                 with suppress(KeyError):
                     stop.name = stops_from_gtfs[stop_id].name
             self[stop_id] = stop
+
+
+def closest_stop(minibus, stops: List[MinibusStop]):
+    return min([((index, stop), minibus.location - stop.location)
+                for index, stop in enumerate(stops)],
+               key=lambda a: a[1])
 
 
 def main():
