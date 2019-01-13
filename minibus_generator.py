@@ -12,20 +12,11 @@ logger.addHandler(logging.NullHandler())
 
 
 @dataclass
-class Minibus:
+class Minibus():
     route_number: str
     location: Geolocation
     speed: int
     heading: int
-    car_id: str
-
-    def __init__(self, raw_minibus: str):
-        self.route_number, longitude, latitude, self.speed, self.heading, self.car_id = raw_minibus.split(',')[1:-1]
-
-        self.route_number, self.speed, self.heading = self.route_number, int(self.speed), int(self.heading)
-
-        longitude, latitude = int(longitude) / 1000000, int(latitude) / 1000000
-        self.location = Geolocation(latitude=latitude, longitude=longitude)
 
 
 class MinibusGenerator:
@@ -42,13 +33,23 @@ class MinibusGenerator:
             self.get_minibuses = self.get_minibuses(self.get_minibuses_online)
 
     @staticmethod
-    def get_minibuses(minibus_retriever):
+    def parse_minibus(minibus: str):
+        route_number, longitude, latitude, speed, heading, car_id = minibus.split(',')[1:-1]
+
+        route_number, speed, heading = route_number, int(speed), int(heading)
+
+        longitude, latitude = int(longitude) / 1000000, int(latitude) / 1000000
+        location = Geolocation(latitude=latitude, longitude=longitude)
+
+        return car_id, Minibus(route_number=route_number, location=location, speed=speed, heading=heading)
+
+    def get_minibuses(self, minibus_retriever):
         def get_minibuses():
             timestamp, minibuses = minibus_retriever()
-            return int(timestamp), {minibus.car_id: minibus
-                                    for minibus in (Minibus(minibus)
-                                                    for minibus in minibuses
-                                                    if len(minibus) > 0)}
+            return int(timestamp), {car_id: minibus
+                                    for car_id, minibus in (self.parse_minibus(minibus)
+                                                            for minibus in minibuses
+                                                            if len(minibus) > 0)}
 
         return get_minibuses
 
@@ -82,7 +83,7 @@ class MinibusGenerator:
 def main():
     minibus_generator = MinibusGenerator(debug=True)
     _, minibuses = minibus_generator.get_minibuses()
-    for minibus in minibuses:
+    for minibus in minibuses.items():
         print(minibus)
 
 
