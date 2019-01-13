@@ -19,16 +19,6 @@ class Minibus:
     heading: int
     car_id: str
 
-    # todo: not sure I will need these in the end
-    def __key(self):
-        return self.route_number, self.car_id
-
-    def __hash__(self):
-        return hash(self.__key())
-
-    def __eq__(self, other):
-        return isinstance(self, type(other)) and self.__key() == other.__key()
-
     def __init__(self, raw_minibus: str):
         self.route_number, longitude, latitude, self.speed, self.heading, self.car_id = raw_minibus.split(',')[1:-1]
 
@@ -38,7 +28,15 @@ class Minibus:
         self.location = Geolocation(latitude=latitude, longitude=longitude)
 
 
-class Minibuses:
+class Minibuses(dict):
+    def __init__(self, minibus_generator):
+        super().__init__()
+        for minibus in minibus_generator:
+            key = minibus.car_id
+            self[key] = minibus
+
+
+class MinibusGenerator:
 
     def __init__(self, debug=False):
         self.session = requests.session()
@@ -55,9 +53,9 @@ class Minibuses:
     def get_minibuses(minibus_retriever):
         def get_minibuses():
             timestamp, minibuses = minibus_retriever()
-            return int(timestamp), (Minibus(minibus)
-                                    for minibus in minibuses
-                                    if len(minibus) > 0)
+            return int(timestamp), Minibuses((Minibus(minibus)
+                                              for minibus in minibuses
+                                              if len(minibus) > 0))
 
         return get_minibuses
 
@@ -87,14 +85,10 @@ class Minibuses:
 
             return current_unix_timestamp, minibuses
 
-    def __iter__(self):
-        _, minibuses = self.get_minibuses()
-        return minibuses
-
 
 def main():
-    minibuses = Minibuses(debug=True)
-
+    minibus_generator = MinibusGenerator(debug=True)
+    _, minibuses = minibus_generator.get_minibuses()
     for minibus in minibuses:
         print(minibus)
 

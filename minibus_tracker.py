@@ -1,4 +1,4 @@
-from minibuses import Minibuses
+from minibus_generator import MinibusGenerator
 from minibus_stops import MinibusStop
 from typing import List
 from minibus_routes import MinibusRoutes
@@ -8,7 +8,7 @@ from minibus_routes import RouteID
 class MinibusTracker(object):
 
     def __init__(self, debug=False):
-        self.minibuses = Minibuses(debug=debug)
+        self.minbus_generator = MinibusGenerator(debug=debug)
 
         tracked_routes = [RouteID(route_number='246', type='b-a1')]
 
@@ -19,9 +19,10 @@ class MinibusTracker(object):
         self.non_tracked_buses = None
         self.tracked_buses = {}
 
+
     def run(self):
         while True:
-            self.non_tracked_buses = iter(self.minibuses)
+            self.non_tracked_buses = iter(self.minbus_generator)
             for route_id, route_data in self.routes.items():
                 for minibus in self.non_tracked_buses:
                     if minibus.route_number == route_id.route_number:
