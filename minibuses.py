@@ -47,20 +47,36 @@ class Minibuses:
         if debug:
             self.minibus_archive = glob.glob('gps/*.txt')
             self.minibus_archive = sorted(self.minibus_archive, key=lambda path: pathlib.Path(path).name)
-            self.get_minibuses = self.get_minibuses_archive
+            self.get_minibuses = self.get_minibuses(self.get_minibuses_archive)
         else:
-            self.get_minibuses = self.get_minibuses_online
+            self.get_minibuses = self.get_minibuses(self.get_minibuses_online)
+
+    @staticmethod
+    def get_minibuses(minibus_retriever):
+        def get_minibuses():
+            timestamp, minibuses = minibus_retriever()
+            return int(timestamp), (Minibus(minibus)
+                                    for minibus in minibuses
+                                    if len(minibus) > 0)
+
+        return get_minibuses
 
     def get_minibuses_archive(self):
-        file = self.minibus_archive.pop(0)
-        logger.debug('file: {}'.format(file))
-        with open(file, mode='r', encoding='utf-8') as archive_gps:
-            for line in archive_gps:
-                yield line
+        file_name = self.minibus_archive.pop(0)
+
+        def minibus_generator(file):
+            logger.debug('file: {}'.format(file))
+            with open(file, mode='r', encoding='utf-8') as archive_gps:
+                for line in archive_gps:
+                    yield line
+
+        current_unix_timestamp = pathlib.Path(file_name).stem
+        minibuses = minibus_generator(file_name)
+        return current_unix_timestamp, minibuses
 
     def get_minibuses_online(self):
-        current_unix_timestamp = str(round(time.time(), 3)).replace('.', '')
-        minibus_url = self.minibus_url.format(current_unix_timestamp)
+        current_unix_timestamp = time.time()
+        minibus_url = self.minibus_url.format(str(round(current_unix_timestamp, 3)).replace('.', ''))
 
         logger.debug('timestamp: {}'.format(current_unix_timestamp))
 
@@ -69,13 +85,11 @@ class Minibuses:
 
             minibuses = response.iter_lines(decode_unicode=True, delimiter='\n')
 
-            return minibuses
+            return current_unix_timestamp, minibuses
 
     def __iter__(self):
-        minibuses = self.get_minibuses()
-        return (Minibus(minibus)
-                for minibus in minibuses
-                if len(minibus) > 0)
+        _, minibuses = self.get_minibuses()
+        return minibuses
 
 
 def main():

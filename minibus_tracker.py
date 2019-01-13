@@ -21,12 +21,12 @@ class MinibusTracker(object):
 
     def run(self):
         while True:
-            self.non_tracked_buses = list(self.minibuses)
+            self.non_tracked_buses = iter(self.minibuses)
             for route_id, route_data in self.routes.items():
                 for minibus in self.non_tracked_buses:
                     if minibus.route_number == route_id.route_number:
                         if self.is_bus_at_terminal_station(minibus, route_data.stops):
-                            pass
+                            print(minibus.car_id, 'at terminal station')
 
     @staticmethod
     def is_bus_at_terminal_station(minibus, stops: List[MinibusStop]):

@@ -23,12 +23,3 @@ class Geolocation(NamedTuple):
 
     def __sub__(self, other):
         return distance_between_points(self, other)
-
-
-def main():
-    distance = Geolocation(1.006, 1) - Geolocation(1, 1)
-    assert int(distance) == 667
-
-
-if __name__ == '__main__':
-    main()
