@@ -87,7 +87,7 @@ class Timetable:
 
     def __getitem__(self, pos: TimetableIndex):
         departure, stop = pos.departure, pos.stop
-        timetable_index = departure - 1 + stop * self.departures
+        timetable_index = departure + stop * self.departures
         time_value = self.timetable[timetable_index]
         logging.debug('{} {}'.format(timetable_index, time_value))
         return time_value
@@ -99,6 +99,10 @@ class Timetable:
                             for i in range(self.departures)),
                            key=lambda a: a[1])
         return departure
+
+    def time_to_stop(self, departure, current_stop, target_stop):
+        return abs(self[TimetableIndex(departure=departure, stop=current_stop)] -
+                   self[TimetableIndex(departure=departure, stop=target_stop)])
 
 
 def main():
