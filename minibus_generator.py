@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from geolocation import Geolocation
 import requests
 import glob
+from datetime import datetime
 import pathlib
 from utility import handle_response
 
@@ -28,12 +29,12 @@ class MinibusGenerator:
         if debug:
             self.minibus_archive = glob.glob('gps/*.txt')
             self.minibus_archive = sorted(self.minibus_archive, key=lambda path: pathlib.Path(path).name)
-            self.get_minibuses = self.get_minibuses(self.get_minibuses_archive)
+            self.get_minibuses = self.get_minibuses(self.__get_minibuses_archive)
         else:
-            self.get_minibuses = self.get_minibuses(self.get_minibuses_online)
+            self.get_minibuses = self.get_minibuses(self.__get_minibuses_online)
 
     @staticmethod
-    def parse_minibus(minibus: str):
+    def __parse_minibus(minibus: str):
         route_number, longitude, latitude, speed, heading, car_id = minibus.split(',')[1:-1]
 
         route_number, speed, heading = route_number, int(speed), int(heading)
@@ -46,14 +47,15 @@ class MinibusGenerator:
     def get_minibuses(self, minibus_retriever):
         def get_minibuses():
             timestamp, minibuses = minibus_retriever()
-            return int(timestamp), {car_id: minibus
-                                    for car_id, minibus in (self.parse_minibus(minibus)
-                                                            for minibus in minibuses
-                                                            if len(minibus) > 0)}
-
+            logger.debug('timestamp: {}'.format(timestamp))
+            return (datetime.utcfromtimestamp(int(timestamp)),
+                    {car_id: minibus
+                     for car_id, minibus in (self.__parse_minibus(minibus)
+                                             for minibus in minibuses
+                                             if len(minibus) > 0)})
         return get_minibuses
 
-    def get_minibuses_archive(self):
+    def __get_minibuses_archive(self):
         file_name = self.minibus_archive.pop(0)
 
         def minibus_generator(file):
@@ -66,7 +68,7 @@ class MinibusGenerator:
         minibuses = minibus_generator(file_name)
         return current_unix_timestamp, minibuses
 
-    def get_minibuses_online(self):
+    def __get_minibuses_online(self):
         current_unix_timestamp = time.time()
         minibus_url = self.minibus_url.format(str(round(current_unix_timestamp, 3)).replace('.', ''))
 

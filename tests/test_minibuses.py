@@ -6,7 +6,6 @@ from nose.tools import assert_greater
 
 def get_minibus_data(minibuses):
     timestamp, minibus_generator = minibuses.get_minibuses()
-    timestamp = datetime.utcfromtimestamp(timestamp)
     return timestamp, list(minibus_generator)
 
 

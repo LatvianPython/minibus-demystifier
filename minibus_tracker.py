@@ -26,12 +26,12 @@ class MinibusTracker(object):
             for route_id, route_data in self.routes.items():
                 for minibus in self.non_tracked_buses:
                     if minibus.route_number == route_id.route_number:
-                        if self.is_bus_at_terminal_station(minibus, route_data.stops):
+                        if self.is_bus_at_terminus(minibus, route_data.stops):
                             print(minibus.car_id, 'at terminal station')
 
     @staticmethod
-    def is_bus_at_terminal_station(minibus, stops: List[MinibusStop]):
-        return minibus.location - stops[0].location < 40
+    def is_bus_at_terminus(minibus, stops: List[MinibusStop], start_station=True):
+        return minibus.location - stops[0 if start_station else -1].location < 40
 
     @staticmethod
     def closest_stop(minibus, stops: List[MinibusStop]):
