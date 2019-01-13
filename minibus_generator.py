@@ -4,8 +4,10 @@ from dataclasses import dataclass
 from geolocation import Geolocation
 import requests
 import glob
-from datetime import datetime
+from utility import to_datetime
 import pathlib
+from datetime import datetime
+from typing import Dict
 from utility import handle_response
 
 logger = logging.getLogger(__name__)
@@ -13,7 +15,7 @@ logger.addHandler(logging.NullHandler())
 
 
 @dataclass
-class Minibus():
+class Minibus:
     route_number: str
     location: Geolocation
     speed: int
@@ -44,15 +46,16 @@ class MinibusGenerator:
 
         return car_id, Minibus(route_number=route_number, location=location, speed=speed, heading=heading)
 
-    def get_minibuses(self, minibus_retriever):
+    def get_minibuses(self, minibus_retriever) -> (datetime, Dict[str, Minibus]):
         def get_minibuses():
             timestamp, minibuses = minibus_retriever()
             logger.debug('timestamp: {}'.format(timestamp))
-            return (datetime.utcfromtimestamp(int(timestamp)),
+            return (to_datetime(timestamp),
                     {car_id: minibus
                      for car_id, minibus in (self.__parse_minibus(minibus)
                                              for minibus in minibuses
                                              if len(minibus) > 0)})
+
         return get_minibuses
 
     def __get_minibuses_archive(self):
@@ -84,8 +87,12 @@ class MinibusGenerator:
 
 def main():
     minibus_generator = MinibusGenerator(debug=True)
-    _, minibuses = minibus_generator.get_minibuses()
-    for minibus in minibuses.items():
+    current_time, minibuses = minibus_generator.get_minibuses()
+
+    print(current_time.second + current_time.hour * 60)
+    for minibus in [item
+                    for i, item in enumerate(minibuses.items())
+                    if i < 5]:
         print(minibus)
 
 

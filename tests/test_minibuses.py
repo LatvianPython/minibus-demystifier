@@ -1,5 +1,5 @@
 from minibus_generator import MinibusGenerator
-from datetime import datetime
+from utility import to_datetime
 from nose.tools import assert_equal
 from nose.tools import assert_greater
 
@@ -13,9 +13,9 @@ def test_minibuses():
     minibus_generator = MinibusGenerator(debug=True)
 
     timestamp, current_minibuses = get_minibus_data(minibus_generator)
-    should_be = datetime(2018, 9, 12, 16, 37, 51)
+    should_be = to_datetime(1536770271)
 
-    assert_equal(timestamp, should_be)
+    assert_equal(timestamp, should_be, '{} != {}'.format(timestamp, should_be))
     assert_equal(len(current_minibuses), 149)
 
     timestamp, _ = get_minibus_data(minibus_generator)
