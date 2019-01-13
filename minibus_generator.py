@@ -28,14 +28,6 @@ class Minibus:
         self.location = Geolocation(latitude=latitude, longitude=longitude)
 
 
-class Minibuses(dict):
-    def __init__(self, minibus_generator):
-        super().__init__()
-        for minibus in minibus_generator:
-            key = minibus.car_id
-            self[key] = minibus
-
-
 class MinibusGenerator:
 
     def __init__(self, debug=False):
@@ -53,9 +45,10 @@ class MinibusGenerator:
     def get_minibuses(minibus_retriever):
         def get_minibuses():
             timestamp, minibuses = minibus_retriever()
-            return int(timestamp), Minibuses((Minibus(minibus)
-                                              for minibus in minibuses
-                                              if len(minibus) > 0))
+            return int(timestamp), {minibus.car_id: minibus
+                                    for minibus in (Minibus(minibus)
+                                                    for minibus in minibuses
+                                                    if len(minibus) > 0)}
 
         return get_minibuses
 
