@@ -1,5 +1,9 @@
 import itertools
+import logging
 from typing import NamedTuple
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 class TimetableIndex(NamedTuple):
@@ -84,17 +88,17 @@ class Timetable:
     def __getitem__(self, pos: TimetableIndex):
         departure, stop = pos.departure, pos.stop
         timetable_index = departure - 1 + stop * self.departures
-        return self.timetable[timetable_index]
+        time_value = self.timetable[timetable_index]
+        logging.debug('{} {}'.format(timetable_index, time_value))
+        return time_value
 
-    def closest_departure(self, current_time, timetable, minibus):
-        # best_fit = (99999, 0)
-        # for i in range(1, max_departures + 1):
-        #     test_index = i - 1 + closest_stop[2] * max_departures
-        #     if abs(times_table[test_index] - current_time) < best_fit[0]:
-        #         best_fit = (abs(times_table[test_index] - current_time), i)
-        #
-        # clicked_departure = best_fit[1]
-        pass
+    def closest_departure(self, current_time, closest_stop_index):
+        time_value = current_time.minute + current_time.hour * 60
+        logging.debug('time_value = {}'.format(time_value))
+        departure, _ = min(((i, abs(self[TimetableIndex(departure=i, stop=closest_stop_index)] - time_value))
+                            for i in range(self.departures)),
+                           key=lambda a: a[1])
+        return departure
 
 
 def main():

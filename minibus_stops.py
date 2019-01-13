@@ -64,9 +64,10 @@ class MinibusStops(dict):
 
 
 def closest_stop(minibus, stops: List[MinibusStop]):
-    return min([((index, stop), minibus.location - stop.location)
-                for index, stop in enumerate(stops)],
-               key=lambda a: a[1])
+    closest, distance_to_closest = min([((index, stop), minibus.location - stop.location)
+                                        for index, stop in enumerate(stops)],
+                                       key=lambda a: a[1])
+    return closest
 
 
 def main():
