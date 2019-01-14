@@ -1,5 +1,6 @@
 import time
 import logging
+from minibus_stops import MinibusStop
 from dataclasses import dataclass
 from geolocation import Geolocation
 import requests
@@ -20,6 +21,10 @@ class Minibus:
     location: Geolocation
     speed: int
     heading: int
+    stop_index: int = None
+    stop: MinibusStop = None
+    departure: int = None
+    times_not_found: int = 0
 
 
 class MinibusGenerator:
