@@ -98,7 +98,7 @@ class App:
                     attachments = self.no_nearby_message
 
                 if attachments != last_message:
-                    self.slack.api_call('chat.postMessage', channel=self.channel, attachments=attachments)
+                    self.update_message(attachments=attachments)
                     last_message = attachments
 
                 sleep(5)
