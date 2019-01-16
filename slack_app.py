@@ -49,6 +49,7 @@ class App:
         return min_timestamp
 
     def update_message(self, attachments):
+        self.timestamp = self.get_last_comment()
         _ = self.slack.api_call('chat.update', channel=self.channel, ts=self.timestamp,
                                 attachments=attachments, as_user=True)
 
