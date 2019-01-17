@@ -53,6 +53,12 @@ class App:
         _ = self.slack.api_call('chat.update', channel=self.channel, ts=self.timestamp,
                                 attachments=attachments, as_user=True)
 
+    def delete_messages(self):
+        pass
+
+    def post_message(self, attachments):
+        _ = self.slack.api_call('chat.postMessage', channel=self.channel, attachments=attachments)
+
     def __init__(self):
         config_parser = configparser.ConfigParser()
         config_parser.read('config.ini')
@@ -99,7 +105,8 @@ class App:
                     attachments = self.no_nearby_message
 
                 if attachments != last_message:
-                    self.update_message(attachments=attachments)
+                    self.delete_messages()
+                    self.post_message(attachments=attachments)
                     last_message = attachments
 
                 sleep(5)
