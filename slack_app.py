@@ -41,23 +41,30 @@ class App:
 
         return attachments
 
-    def get_last_comment(self):
+    def get_last_bot_comment(self):
         response = self.slack.api_call('im.history', channel=self.channel, count=10)
-
-        min_timestamp = max(message['ts'] for message in response['messages'])
-
-        return min_timestamp
+        try:
+            min_timestamp = max(message['ts'] for message in response['messages']
+                                if 'bot_id' in message)
+            return min_timestamp
+        except ValueError:
+            return None
 
     def update_message(self, attachments):
-        self.timestamp = self.get_last_comment()
-        _ = self.slack.api_call('chat.update', channel=self.channel, ts=self.timestamp,
-                                attachments=attachments, as_user=True)
+        self.timestamp = self.get_last_bot_comment()
+        if self.timestamp is not None:
+            return self.slack.api_call('chat.update', channel=self.channel, ts=self.timestamp,
+                                       attachments=attachments, as_user=False)
+        return None
 
     def delete_messages(self):
-        pass
+        self.timestamp = self.get_last_bot_comment()
+        if self.timestamp is not None:
+            return self.slack.api_call('chat.delete', channel=self.channel, ts=self.timestamp, as_user=True)
+        return None
 
     def post_message(self, attachments):
-        _ = self.slack.api_call('chat.postMessage', channel=self.channel, attachments=attachments)
+        return self.slack.api_call('chat.postMessage', channel=self.channel, attachments=attachments)
 
     def __init__(self):
         config_parser = configparser.ConfigParser()
@@ -71,7 +78,7 @@ class App:
 
         self.slack = slackclient.SlackClient(slack_token)
 
-        self.timestamp = self.get_last_comment()
+        self.timestamp = self.get_last_bot_comment()
 
         route_config = config_parser['tracked_route']
 
@@ -84,7 +91,7 @@ class App:
 
         self.no_nearby_message = [{
             'fallback': 'No minibuses incoming',
-            'color': '#E3E4E6',
+            'color': '#E3E4E6',  # grey
             'title': 'No minibuses incoming'
         }]
 
