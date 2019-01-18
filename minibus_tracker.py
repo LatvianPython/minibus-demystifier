@@ -35,6 +35,7 @@ class MinibusTracker(object):
                 minibus.times_not_found = 0
                 self.tracked_minibuses[car_id] = minibus
 
+        # todo: try to implement ability to match minibus when it's not at the terminal, only useful if app  breaks
         for car_id, minibus in self.tracked_minibuses.copy().items():
             if (minibus.route_number == self.route_id.route_number and
                     closest_stop(minibus=minibus, stops=self.route_data.stops)[0] == (len(self.route_data.stops) - 1)):

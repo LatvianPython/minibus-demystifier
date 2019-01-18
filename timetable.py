@@ -100,6 +100,7 @@ class Timetable:
                            key=lambda a: a[1])
         return departure
 
+    # todo: change to also take into account location of minibus to allow for second precision?
     def time_to_stop(self, departure, current_stop, target_stop):
         return abs(self[TimetableIndex(departure=departure, stop=current_stop)] -
                    self[TimetableIndex(departure=departure, stop=target_stop)])
