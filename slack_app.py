@@ -57,7 +57,7 @@ class App:
                                        attachments=attachments, as_user=False)
         return None
 
-    def delete_messages(self):
+    def delete_latest_bot_message(self):
         self.timestamp = self.get_last_bot_comment()
         if self.timestamp is not None:
             return self.slack.api_call('chat.delete', channel=self.channel, ts=self.timestamp, as_user=True)
@@ -112,7 +112,7 @@ class App:
                     attachments = self.no_nearby_message
 
                 if attachments != last_message:
-                    self.delete_messages()
+                    self.delete_latest_bot_message()
                     self.post_message(attachments=attachments)
                     last_message = attachments
 
@@ -123,7 +123,6 @@ class App:
 
 def main():
     app = App()
-
     app.run()
 
 

@@ -50,11 +50,6 @@ class MinibusTracker(object):
                                   if minibus.times_not_found < 5
                                   }
 
-    def run(self):
-        while True:
-            self.refresh_minibuses()
-            logging.debug('tracked buses = {}'.format(len(self.tracked_minibuses)))
-
     def is_bus_at_first_stop_in_route(self, minibus, stops: List[MinibusStop]):
         return self.is_bus_at_terminus(minibus=minibus, stops=stops, start_station=True)
 
@@ -63,13 +58,11 @@ class MinibusTracker(object):
 
     @staticmethod
     def is_bus_at_terminus(minibus, stops: List[MinibusStop], start_station):
-        return minibus.location - stops[0 if start_station else -1].location < 300
+        return minibus.location - stops[0 if start_station else -1].location < 100
 
 
 def main():
     minibus_tracker = MinibusTracker(RouteID(route_number='246', type='a1-b'), debug=True)
-
-    # minibus_tracker.run()
 
     for i in range(1875):
         minibus_tracker.refresh_minibuses()
