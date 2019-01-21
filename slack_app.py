@@ -17,7 +17,7 @@ class App:
 
         color = next((color
                       for color, time_range in color_dict.items()
-                      if time_to_stop in time_range), default='good')
+                      if time_to_stop in time_range), 'good')
 
         attachment = {
             'fallback': 'Minibus in {} minutes'.format(time_to_stop),
