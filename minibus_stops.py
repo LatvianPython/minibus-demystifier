@@ -1,3 +1,4 @@
+from collections import namedtuple
 import requests
 from geolocation import Geolocation
 from dataclasses import dataclass
@@ -16,6 +17,9 @@ logger.addHandler(logging.NullHandler())
 class MinibusStop:
     location: Geolocation
     name: str
+
+
+ClosestStop = namedtuple(typename='ClosestStop', field_names=['stop_index', 'stop'])
 
 
 def gtfs_stops():
@@ -63,8 +67,9 @@ class MinibusStops(dict):
             self[stop_id] = stop
 
 
+# fixme: this seems pretty bad, especially the use in tracking
 def closest_stop(minibus, stops: List[MinibusStop]):
-    closest, distance_to_closest = min([((index, stop), minibus.location - stop.location)
+    closest, distance_to_closest = min([(ClosestStop(index, stop), minibus.location - stop.location)
                                         for index, stop in enumerate(stops)],
                                        key=lambda a: a[1])
     return closest

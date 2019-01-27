@@ -26,7 +26,7 @@ class MinibusTracker(object):
         for car_id, minibus in self.non_tracked_buses.items():
             if (car_id in self.tracked_minibuses or (
                     minibus.route_number == self.route_id.route_number and
-                    closest_stop(minibus=minibus, stops=self.route_data.stops)[0] == 0)):
+                    closest_stop(minibus=minibus, stops=self.route_data.stops).stop_index == 0)):
                 minibus.stop_index, minibus.stop = closest_stop(minibus=minibus, stops=self.route_data.stops)
                 minibus.departure = self.route_data.timetable.closest_departure(
                     current_time=current_time,
@@ -38,7 +38,8 @@ class MinibusTracker(object):
         # todo: try to implement ability to match minibus when it's not at the terminal, only useful if app  breaks
         for car_id, minibus in self.tracked_minibuses.copy().items():
             if (minibus.route_number == self.route_id.route_number and
-                    closest_stop(minibus=minibus, stops=self.route_data.stops)[0] == (len(self.route_data.stops) - 1)):
+                    closest_stop(minibus=minibus, stops=self.route_data.stops).stop_index == (
+                            len(self.route_data.stops) - 1)):
                 del self.tracked_minibuses[car_id]
 
         for car_id in self.tracked_minibuses.keys():
@@ -50,12 +51,15 @@ class MinibusTracker(object):
                                   if minibus.times_not_found < 5
                                   }
 
+    # fixme: not really used
     def is_bus_at_first_stop_in_route(self, minibus, stops: List[MinibusStop]):
         return self.is_bus_at_terminus(minibus=minibus, stops=stops, start_station=True)
 
+    # fixme: not really used
     def is_bus_at_last_stop_in_route(self, minibus, stops: List[MinibusStop]):
         return self.is_bus_at_terminus(minibus=minibus, stops=stops, start_station=False)
 
+    # fixme: not really used
     @staticmethod
     def is_bus_at_terminus(minibus, stops: List[MinibusStop], start_station):
         return minibus.location - stops[0 if start_station else -1].location < 100
