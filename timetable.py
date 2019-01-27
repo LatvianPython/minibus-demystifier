@@ -104,11 +104,3 @@ class Timetable:
     def time_to_stop(self, departure, current_stop, target_stop):
         return abs(self[TimetableIndex(departure=departure, stop=current_stop)] -
                    self[TimetableIndex(departure=departure, stop=target_stop)])
-
-
-def main():
-    pass
-
-
-if __name__ == '__main__':
-    main()

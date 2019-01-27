@@ -18,6 +18,7 @@ def handle_response(response):
         )
         response.raise_for_status()
 
+
 def to_datetime(timestamp):
     try:
         return datetime.fromtimestamp(timestamp, timezone(timedelta(hours=2)))
