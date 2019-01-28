@@ -22,3 +22,9 @@ def test_slack_attachments():
     attachments = app.format_for_slack(minibuses=minibuses)
 
     assert_is_not_none(attachments)
+
+
+def test_refresh():
+    app = App()
+
+    app.refresh_slack()

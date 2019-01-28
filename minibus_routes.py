@@ -73,18 +73,3 @@ class MinibusRoutes(dict):
                     route = MinibusRoute(name=route_name, stops=route_stops, timetable=Timetable(timetable))
                     last_route_number = route_number
                     self[route_id] = route
-
-
-def main():
-    minibus_routes = MinibusRoutes()
-
-    route = minibus_routes[RouteID(route_number='246', type='b-a1')]
-
-    stops = route.stops
-
-    for stop in stops[:5]:
-        print(stop)
-
-
-if __name__ == '__main__':
-    main()

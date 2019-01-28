@@ -89,36 +89,38 @@ class App:
 
         self.timetable = self.tracker.route_data.timetable
 
+        self.last_message = None
+
         self.no_nearby_message = [{
             'fallback': 'No minibuses incoming',
             'color': '#E3E4E6',  # grey
             'title': 'No minibuses incoming'
         }]
 
-    def run(self):
-        last_message = None
-        if self.slack.rtm_connect():
-            while self.slack.server.connected is True:
+        if not self.slack.rtm_connect():
+            raise RuntimeError('Could not connect to Slack RTM')
 
-                self.tracker.refresh_minibuses()
+    def refresh_slack(self):
+        self.tracker.refresh_minibuses()
 
-                minibuses = [minibus
-                             for minibus in self.tracker.tracked_minibuses.values()
-                             if minibus.stop_index <= self.stop_index]
+        minibuses = [minibus
+                     for minibus in self.tracker.tracked_minibuses.values()
+                     if minibus.stop_index <= self.stop_index]
 
-                if len(minibuses) > 0:
-                    attachments = self.format_for_slack(minibuses=minibuses)
-                else:
-                    attachments = self.no_nearby_message
-
-                if attachments != last_message:
-                    self.delete_latest_bot_message()
-                    self.post_message(attachments=attachments)
-                    last_message = attachments
-
-                sleep(5)
+        if len(minibuses) > 0:
+            attachments = self.format_for_slack(minibuses=minibuses)
         else:
-            print('Connection Failed')
+            attachments = self.no_nearby_message
+
+        if attachments != self.last_message:
+            self.delete_latest_bot_message()
+            self.post_message(attachments=attachments)
+            self.last_message = attachments
+
+    def run(self):
+        while self.slack.server.connected is True:
+            self.refresh_slack()
+            sleep(5)
 
 
 def main():

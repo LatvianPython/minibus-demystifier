@@ -40,14 +40,14 @@ class MinibusTracker(object):
 
                 minibus.departure = self.route_data.timetable.closest_departure(current_time=current_time,
                                                                                 closest_stop_index=minibus.stop_index)
-                minibus.times_not_found = 0
+
                 self.tracked_minibuses[car_id] = minibus
 
         # minibuses sometimes can not appear in gps data intermittently for a few reading, make sure not to lose them
         for car_id in list(self.tracked_minibuses.keys()):
             if car_id not in non_tracked_buses.keys():
-                self.lost_minibuses[car_id] += 1
-                if self.lost_minibuses[car_id] > 5:
+                times_missing = self.lost_minibuses[car_id] = self.lost_minibuses[car_id] + 1
+                if times_missing > 5:
                     del self.tracked_minibuses[car_id]
                     del self.lost_minibuses[car_id]
 
@@ -56,16 +56,3 @@ class MinibusTracker(object):
 
     def at_last_stop(self, minibus):
         return closest_stop(minibus=minibus, stops=self.route_data.stops).stop_index == (len(self.route_data.stops) - 1)
-
-
-def main():
-    minibus_tracker = MinibusTracker(RouteID(route_number='246', type='a1-b'), debug=True)
-
-    for i in range(1875):
-        minibus_tracker.refresh_minibuses()
-
-        print(i, len(minibus_tracker.tracked_minibuses))
-
-
-if __name__ == '__main__':
-    main()

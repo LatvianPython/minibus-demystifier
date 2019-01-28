@@ -87,18 +87,3 @@ class MinibusGenerator:
             minibuses = response.iter_lines(decode_unicode=True, delimiter='\n')
 
             return current_unix_timestamp, minibuses
-
-
-def main():
-    minibus_generator = MinibusGenerator(debug=True)
-    current_time, minibuses = minibus_generator.get_minibuses()
-
-    print(current_time.second + current_time.hour * 60)
-    for minibus in [item
-                    for i, item in enumerate(minibuses.items())
-                    if i < 5]:
-        print(minibus)
-
-
-if __name__ == '__main__':
-    main()

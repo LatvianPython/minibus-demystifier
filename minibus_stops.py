@@ -74,13 +74,3 @@ def closest_stop(minibus, stops: List[MinibusStop]):
                                        key=lambda a: a[1])
     return closest
 
-
-def main():
-    minibus_stops = MinibusStops()
-
-    for stop_id, stop in minibus_stops.items():
-        print(stop_id, stop)
-
-
-if __name__ == '__main__':
-    main()
