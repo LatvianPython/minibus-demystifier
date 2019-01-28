@@ -2,7 +2,6 @@ from minibus_generator import MinibusGenerator
 from minibus_stops import closest_stop
 import logging
 from minibus_routes import MinibusRoutes
-from minibus_routes import RouteID
 from collections import defaultdict
 
 logger = logging.getLogger(__name__)

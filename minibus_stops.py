@@ -73,4 +73,3 @@ def closest_stop(minibus, stops: List[MinibusStop]):
                                         for index, stop in enumerate(stops)],
                                        key=lambda a: a[1])
     return closest
-
