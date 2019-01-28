@@ -7,7 +7,7 @@ from contextlib import suppress
 import csv
 from typing import List
 import logging
-from utility import handle_response
+from utility import handle_request
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -20,6 +20,11 @@ class MinibusStop:
 
 
 ClosestStop = namedtuple(typename='ClosestStop', field_names=['stop_index', 'stop'])
+
+
+def get_stops():
+    stops_url = 'https://marsruti.lv/rigasmikroautobusi/bbus/stops.txt'
+    return handle_request(url=stops_url)
 
 
 def gtfs_stops():
@@ -36,22 +41,18 @@ def gtfs_stops():
 
 
 def online_stops():
-    stops_url = 'https://marsruti.lv/rigasmikroautobusi/bbus/stops.txt'
-    with requests.get(stops_url) as response:
-        content = response.content.decode('utf-8-sig')
 
-        handle_response(response)
+    csv_data = get_stops()
 
-        with StringIO(content) as csv_data:
-            delimiter = ';'
-            fieldnames = csv_data.readline().strip().lower().split(delimiter)
-            stop_reader = csv.DictReader(csv_data, delimiter=delimiter, fieldnames=fieldnames)
+    delimiter = ';'
+    fieldnames = csv_data.readline().strip().lower().split(delimiter)
+    stop_reader = csv.DictReader(csv_data, delimiter=delimiter, fieldnames=fieldnames)
 
-            for row in stop_reader:
-                stop_id, name, longitude, latitude = row['id'], row['name'], row['lng'], row['lat']
-                longitude, latitude = int(longitude) / 100000, int(latitude) / 100000
-                location = Geolocation(longitude=longitude, latitude=latitude)
-                yield stop_id, MinibusStop(location=location, name=name)
+    for row in stop_reader:
+        stop_id, name, longitude, latitude = row['id'], row['name'], row['lng'], row['lat']
+        longitude, latitude = int(longitude) / 100000, int(latitude) / 100000
+        location = Geolocation(longitude=longitude, latitude=latitude)
+        yield stop_id, MinibusStop(location=location, name=name)
 
 
 class MinibusStops(dict):

@@ -1,4 +1,6 @@
+import requests
 import logging
+from io import StringIO
 from datetime import datetime, timezone, timedelta
 
 logger = logging.getLogger(__name__)
@@ -17,6 +19,13 @@ def handle_response(response):
                 response.cookies)
         )
         response.raise_for_status()
+
+
+def handle_request(url):
+    with requests.get(url) as response:
+        handle_response(response)
+        content = response.content.decode('utf-8-sig')
+        return StringIO(content)
 
 
 def to_datetime(timestamp):
