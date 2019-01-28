@@ -24,7 +24,6 @@ class Minibus:
     stop_index: int = None
     stop: MinibusStop = None
     departure: int = None
-    times_not_found: int = 0
 
 
 class MinibusGenerator:
