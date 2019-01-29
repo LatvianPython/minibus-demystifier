@@ -3,6 +3,11 @@ from minibus_tracker import MinibusTracker
 import slackclient
 from time import sleep
 import configparser
+import logging
+from logging import config
+
+config.fileConfig('log.ini')
+logger = logging.getLogger(__name__)
 
 
 class App:
@@ -124,6 +129,7 @@ class App:
 
 
 def main():
+    logger.debug('Starting Slack app')
     app = App()
     app.run()
 

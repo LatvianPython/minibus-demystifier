@@ -21,7 +21,6 @@ class MinibusTracker(object):
 
     def refresh_minibuses(self):
         current_time, non_tracked_buses = self.minibus_generator.get_minibuses()
-        logger.debug('current_time = {}'.format(current_time))
 
         non_tracked_buses = {car_id: minibus
                              for car_id, minibus in non_tracked_buses.items()

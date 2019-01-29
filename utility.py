@@ -9,7 +9,12 @@ logger.addHandler(logging.NullHandler())
 
 def handle_response(response):
     if response.status_code == 200:
-        logger.debug('response status: {}, length: {}'.format(response.status_code, len(response.content)))
+        logger.debug('response status: {}, length: {}, elapsed: {}, url: {}'.format(
+            response.status_code,
+            len(response.content),
+            response.elapsed,
+            response.url
+        ))
     else:
         logger.critical(
             'request failed with {}, content = "{}", headers = "{}", cookies = "{}"'.format(

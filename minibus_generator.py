@@ -10,6 +10,7 @@ import pathlib
 from datetime import datetime
 from typing import Dict
 from utility import handle_response
+from requests import ConnectionError
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -79,11 +80,13 @@ class MinibusGenerator:
         current_unix_timestamp = time.time()
         minibus_url = self.minibus_url.format(str(round(current_unix_timestamp, 3)).replace('.', ''))
 
-        logger.debug('timestamp: {}'.format(current_unix_timestamp))
+        try:
+            with self.session.get(minibus_url) as response:
+                handle_response(response)
 
-        with self.session.get(minibus_url) as response:
-            handle_response(response)
+                minibuses = response.iter_lines(decode_unicode=True, delimiter='\n')
 
-            minibuses = response.iter_lines(decode_unicode=True, delimiter='\n')
-
-            return current_unix_timestamp, minibuses
+                return current_unix_timestamp, minibuses
+        except ConnectionError:
+            logger.debug('ConnectionError')
+            return self.get_minibuses()
