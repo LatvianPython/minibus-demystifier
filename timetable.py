@@ -89,12 +89,10 @@ class Timetable:
         departure, stop = pos.departure, pos.stop
         timetable_index = departure + stop * self.departures
         time_value = self.timetable[timetable_index]
-        logging.debug('{} {}'.format(timetable_index, time_value))
         return time_value
 
     def closest_departure(self, current_time, closest_stop_index):
         time_value = current_time.minute + current_time.hour * 60
-        logging.debug('time_value = {}'.format(time_value))
         departure, _ = min(((i, abs(self[TimetableIndex(departure=i, stop=closest_stop_index)] - time_value))
                             for i in range(self.departures)),
                            key=lambda a: a[1])
