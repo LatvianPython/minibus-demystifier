@@ -34,6 +34,8 @@ def handle_request(url):
 
 
 def to_datetime(timestamp):
+    if isinstance(timestamp, datetime):
+        return timestamp
     try:
         return datetime.fromtimestamp(timestamp, timezone(timedelta(hours=2)))
     except TypeError:

@@ -7,8 +7,6 @@ import requests
 import glob
 from utility import to_datetime
 import pathlib
-from datetime import datetime
-from typing import Dict
 from utility import handle_response
 from requests import ConnectionError
 
@@ -51,7 +49,7 @@ class MinibusGenerator:
 
         return car_id, Minibus(route_number=route_number, location=location, speed=speed, heading=heading)
 
-    def get_minibuses(self, minibus_retriever) -> (datetime, Dict[str, Minibus]):
+    def get_minibuses(self, minibus_retriever):
         def get_minibuses():
             timestamp, minibuses = minibus_retriever()
             logger.debug('timestamp: {}'.format(timestamp))
