@@ -1,10 +1,6 @@
 # minibus-demystifier
 
-Demystifies the arrival of minibuses for a desired route and stop. 
-
-Only really supposed to work for Riga/Latvia
-
-![Screenshot](doc/sample.png)
+Demystifies the arrival of minibuses for a desired route and stop in Riga/Latvia, so you never miss one ever again! 
 
 # installing
 
@@ -19,3 +15,7 @@ Requirements can be installed via:
 Basic usage is covered in `examples/basic.py`
 
 For some advanced usage examples refer to implementation within `slack_app.py`
+
+# example of `slack_app.py`
+
+![Screenshot](doc/sample.png)
