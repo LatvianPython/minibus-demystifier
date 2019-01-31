@@ -4,6 +4,8 @@ Demystifies the arrival of minibuses for a desired route and stop in Riga/Latvia
 
 # installing
 
+You would need to clone or download the whole repository.
+
 Right now only really supporting *Python 3.7*
 
 Requirements can be installed via:
