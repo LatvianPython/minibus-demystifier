@@ -1,0 +1,1 @@
+should be filled with pre-fetched gps readings, only for tests and running tracker in debug mode
