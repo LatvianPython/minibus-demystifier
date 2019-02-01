@@ -16,6 +16,14 @@ Requirements can be installed via:
 
 `pip install -r requirements.txt`
 
+Due to optimizations now need to compile a Cython file
+
+You will need a C compiler
+
+You can compile using
+
+`cythonize.exe -a -i -3 .\geolocation\calculations.pyx`
+
 # how to use
 
 Basic usage is covered in /examples/basic.py

@@ -20,7 +20,7 @@ class MinibusTracker(object):
         self.lost_minibuses = defaultdict(int)
 
     def refresh_minibuses(self):
-        current_time, non_tracked_buses = self.minibus_generator.get_minibuses()
+        current_time, non_tracked_buses = self.minibus_generator.get_minibuses(route_number=self.route_id.route_number)
 
         non_tracked_buses = {car_id: minibus
                              for car_id, minibus in non_tracked_buses.items()
@@ -55,7 +55,7 @@ class MinibusTracker(object):
                     del self.lost_minibuses[car_id]
 
     def at_first_stop(self, minibus):
-        return closest_stop(minibus=minibus, stops=self.route_data.stops).stop_index == 0
+        return minibus.location - self.route_data.stops[0].location < 100
 
     def at_last_stop(self, minibus):
-        return closest_stop(minibus=minibus, stops=self.route_data.stops).stop_index == (len(self.route_data.stops) - 1)
+        return minibus.location - self.route_data.stops[-1].location < 100

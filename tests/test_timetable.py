@@ -48,7 +48,7 @@ class TestClass(TestCase):
     def test_closest_departure(self):
         minibus_generator = MinibusGenerator(debug=True)
 
-        current_time, minibuses = minibus_generator.get_minibuses()
+        current_time, minibuses = minibus_generator.get_minibuses('246')
 
         stops = self.route.stops
 

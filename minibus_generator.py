@@ -50,14 +50,15 @@ class MinibusGenerator:
         return car_id, Minibus(route_number=route_number, location=location, speed=speed, heading=heading)
 
     def get_minibuses(self, minibus_retriever):
-        def get_minibuses():
+        def get_minibuses(route_number):
             timestamp, minibuses = minibus_retriever()
             logger.debug('timestamp: {}'.format(timestamp))
             return (to_datetime(timestamp),
                     {car_id: minibus
                      for car_id, minibus in (self.__parse_minibus(minibus)
                                              for minibus in minibuses
-                                             if len(minibus) > 0)})
+                                             if len(minibus) > 0
+                                             if minibus[2:5] == route_number)})
 
         return get_minibuses
 
