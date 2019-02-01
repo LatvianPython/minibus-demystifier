@@ -42,7 +42,7 @@ class MinibusGenerator:
     def __parse_minibus(minibus: str):
         route_number, longitude, latitude, speed, heading, car_id = minibus.split(',')[1:-1]
 
-        route_number, speed, heading = route_number, int(speed), int(heading)
+        speed, heading = int(speed), int(heading)
 
         longitude, latitude = int(longitude) / 1000000, int(latitude) / 1000000
         location = Geolocation(latitude=latitude, longitude=longitude)
