@@ -21,11 +21,3 @@ def test_minibuses():
     timestamp, _ = get_minibus_data(minibus_generator)
 
     assert_greater(timestamp, should_be)
-
-
-def test_integration():
-    minibus_generator = MinibusGenerator()
-
-    _, current_minibuses = get_minibus_data(minibus_generator)
-
-    assert_greater(len(current_minibuses), 0)

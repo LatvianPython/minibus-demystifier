@@ -28,6 +28,3 @@ class TestTracking(TestCase):
         attachments = self.app.format_for_slack(minibuses=minibuses)
 
         assert_is_not_none(attachments)
-
-    def test_refresh(self):
-        self.app.refresh_slack()

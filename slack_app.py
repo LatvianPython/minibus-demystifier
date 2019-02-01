@@ -77,13 +77,13 @@ class App:
 
         slack_config = config_parser['slack']
 
-        slack_token = slack_config['token']
+        self.slack_token = slack_config['token']
         self.channel = slack_config['channel']
         self.stop_index = int(slack_config['stop'])
 
-        self.slack = slackclient.SlackClient(slack_token)
-
-        self.timestamp = self.get_last_bot_comment()
+        self.slack = None
+        self.timestamp = None
+        self.last_message = None
 
         route_config = config_parser['tracked_route']
 
@@ -94,16 +94,11 @@ class App:
 
         self.timetable = self.tracker.route_data.timetable
 
-        self.last_message = None
-
         self.no_nearby_message = [{
             'fallback': 'No minibuses incoming',
             'color': '#E3E4E6',  # grey
             'title': 'No minibuses incoming'
         }]
-
-        if not self.slack.rtm_connect():
-            raise RuntimeError('Could not connect to Slack RTM')
 
     def refresh_slack(self):
         self.tracker.refresh_minibuses()
@@ -123,6 +118,10 @@ class App:
             self.last_message = attachments
 
     def run(self):
+        self.slack = slackclient.SlackClient(self.slack_token)
+        self.timestamp = self.get_last_bot_comment()
+        if not self.slack.rtm_connect():
+            raise RuntimeError('Could not connect to Slack RTM')
         while self.slack.server.connected is True:
             self.refresh_slack()
             sleep(5)
