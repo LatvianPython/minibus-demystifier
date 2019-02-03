@@ -88,4 +88,4 @@ class MinibusGenerator:
                 return current_unix_timestamp, minibuses
         except ConnectionError:
             logger.debug('ConnectionError')
-            return self.get_minibuses()
+            return self.__get_minibuses_online()
